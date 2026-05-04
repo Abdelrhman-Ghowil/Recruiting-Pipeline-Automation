@@ -1304,58 +1304,626 @@
 </section>
 
 <!-- TIMELINE / BUILD PHASES -->
+<style>
+  .phase-block {
+    margin-bottom: 56px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg2);
+  }
+  .phase-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 28px 36px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background .2s;
+    user-select: none;
+  }
+  .phase-header:hover { background: var(--bg3); }
+  .phase-header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .phase-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 4px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .phase-badge.cyan   { color: var(--cyan);   border-color: rgba(0,229,255,0.3);   background: rgba(0,229,255,0.06); }
+  .phase-badge.violet { color: #a78bfa;        border-color: rgba(124,58,237,0.3);  background: rgba(124,58,237,0.08); }
+  .phase-badge.amber  { color: #fbbf24;        border-color: rgba(245,158,11,0.3);  background: rgba(245,158,11,0.07); }
+  .phase-badge.green  { color: #34d399;        border-color: rgba(16,185,129,0.3);  background: rgba(16,185,129,0.07); }
+  .phase-title-group h3 {
+    font-family: var(--display);
+    font-size: 28px;
+    letter-spacing: 0.5px;
+    line-height: 1.1;
+    margin-bottom: 3px;
+  }
+  .phase-title-group p {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+  .phase-hrs {
+    font-family: var(--display);
+    font-size: 32px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .phase-toggle {
+    font-size: 18px;
+    color: var(--text3);
+    transition: transform .3s;
+    margin-left: 8px;
+  }
+  .phase-block.open .phase-toggle { transform: rotate(180deg); }
+  .phase-body {
+    display: none;
+    padding: 36px;
+  }
+  .phase-block.open .phase-body { display: block; }
+
+  .impl-intro {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    max-width: 720px;
+  }
+
+  .impl-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+  .impl-steps::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: var(--border2);
+  }
+  .impl-step {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 20px;
+    padding-bottom: 28px;
+    position: relative;
+  }
+  .impl-step:last-child { padding-bottom: 0; }
+  .impl-step-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .impl-step-body {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .impl-step-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .impl-step-sub {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.65;
+    margin-bottom: 12px;
+  }
+  .impl-step-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .impl-detail-chip {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.8px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text3);
+    border: 1px solid var(--border);
+  }
+
+  .deliverable-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    align-items: center;
+  }
+  .deliverable-strip-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-right: 4px;
+  }
+  .deliverable-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 12px;
+  }
+  .deliverable-chip span { color: var(--green); font-size: 11px; }
+</style>
+
 <div class="full-border-section">
 <section id="timeline" class="section">
   <p class="section-label">Project Timeline</p>
   <h2 class="section-title">Build Milestones</h2>
-  <p class="section-desc">Structured 4-phase delivery with weekly testing milestones and clear handoff criteria at each stage.</p>
+  <p class="section-desc">Structured 4-phase delivery — click each phase to see exactly how we implement it, step by step.</p>
 
-  <div class="timeline">
-
-    <div class="timeline-item">
-      <div class="timeline-dot" style="--accent: var(--cyan)"></div>
-      <div class="timeline-phase">Phase 01</div>
-      <div class="timeline-content">
-        <h4>Foundation Build</h4>
-        <p>GHL environment setup — pipeline stages, custom contact fields, recruiter accounts, opportunity templates. ATS → Zapier webhook connection and initial field mapping validation.</p>
+  <!-- PHASE 01 -->
+  <div class="phase-block open" id="ph1">
+    <div class="phase-header" onclick="togglePhase('ph1')">
+      <div class="phase-header-left">
+        <div class="phase-badge cyan">Phase 01</div>
+        <div class="phase-title-group">
+          <h3>Foundation Build</h3>
+          <p>GHL Environment · ATS Connection · Field Mapping</p>
+        </div>
       </div>
-      <div class="timeline-hours">6 – 8 HRS</div>
+      <div class="phase-hrs" style="color: var(--cyan);">6–8 <span style="font-size:18px;color:var(--text3)">hrs</span></div>
+      <div class="phase-toggle">▾</div>
     </div>
+    <div class="phase-body">
+      <p class="impl-intro">We start with zero-to-one: a clean GHL sub-account configured exactly around your recruiting process. Before any automation fires, every structural element — pipeline, fields, tags, users — must be precisely defined. This phase ends when a test candidate record travels from ATS all the way into GHL with accurate field data.</p>
 
-    <div class="timeline-item">
-      <div class="timeline-dot" style="--accent: var(--violet)"></div>
-      <div class="timeline-phase">Phase 02</div>
-      <div class="timeline-content">
-        <h4>Automation Logic</h4>
-        <p>Multi-step Zap configuration, GHL workflow automation rules, AI screening tool integration and calibration, automated tagging system, and conditional routing logic.</p>
+      <div class="impl-steps">
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(0,229,255,0.35); color: var(--cyan);">01</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">GHL Sub-Account Setup & Configuration</div>
+            <p class="impl-step-sub">Create or configure the GHL sub-account for recruiting. Set up recruiter user seats with correct role permissions (admin, recruiter, view-only). Configure timezone, business hours, and brand identity (logo, colors) so all outbound communications look professional from day one.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">GHL Sub-account</span>
+              <span class="impl-detail-chip">User roles & permissions</span>
+              <span class="impl-detail-chip">Brand settings</span>
+              <span class="impl-detail-chip">Business hours config</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(0,229,255,0.35); color: var(--cyan);">02</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Pipeline Stages Construction</div>
+            <p class="impl-step-sub">Build the full recruiting pipeline inside GHL Opportunities, mirroring your predefined stage map exactly. Each stage gets a clear name, color code, and win/loss designation. We configure probability weights for reporting and set up stage-transition rules so records can only move in valid sequences.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">12+ pipeline stages</span>
+              <span class="impl-detail-chip">Stage color coding</span>
+              <span class="impl-detail-chip">Win/loss rules</span>
+              <span class="impl-detail-chip">Transition validation</span>
+              <span class="impl-detail-chip">Probability config</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(0,229,255,0.35); color: var(--cyan);">03</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Custom Contact Fields & Opportunity Templates</div>
+            <p class="impl-step-sub">Map every ATS data point to a GHL custom field — job title applied for, source channel, screening score, interview date, recruiter assigned, candidate notes. Build the Opportunity template so new records auto-populate with the right field structure. Set up tags taxonomy (source tags, status tags, disqualification reason tags).</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Custom field mapping</span>
+              <span class="impl-detail-chip">Opportunity templates</span>
+              <span class="impl-detail-chip">Tag taxonomy</span>
+              <span class="impl-detail-chip">Data schema design</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(0,229,255,0.35); color: var(--cyan);">04</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">ATS Webhook Configuration</div>
+            <p class="impl-step-sub">Inside your ATS, configure outbound webhooks to fire on key events: new application submitted, application status changed, candidate disqualified. We document the exact JSON payload structure your ATS sends and validate it using Zapier's built-in webhook inspector to confirm field names and data types.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">ATS webhook setup</span>
+              <span class="impl-detail-chip">Event triggers defined</span>
+              <span class="impl-detail-chip">JSON payload validation</span>
+              <span class="impl-detail-chip">Zapier catch hook</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(0,229,255,0.35); color: var(--cyan);">05</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Initial Field Mapping & Data Validation</div>
+            <p class="impl-step-sub">Build the first Zap: ATS Webhook Trigger → GHL Contact Create/Update. Map every ATS field to its corresponding GHL custom field. Run 5–10 live test submissions through the ATS and verify each record appears in GHL with correct data. Fix any field-type mismatches (date formats, phone number formatting, empty field fallbacks).</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Field-to-field mapping</span>
+              <span class="impl-detail-chip">Format normalization</span>
+              <span class="impl-detail-chip">Live test submissions</span>
+              <span class="impl-detail-chip">Error fallback rules</span>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <div class="timeline-hours">10 – 12 HRS</div>
-    </div>
 
-    <div class="timeline-item">
-      <div class="timeline-dot" style="--accent: var(--amber)"></div>
-      <div class="timeline-phase">Phase 03</div>
-      <div class="timeline-content">
-        <h4>Engagement & Calendar</h4>
-        <p>SMS/email nurturing sequence deployment (using pre-built templates), Google Calendar integration, self-scheduling workflow, reminder sequences, and no-show recovery protocol.</p>
+      <div class="deliverable-strip">
+        <span class="deliverable-strip-label">// Phase 01 Deliverables</span>
+        <div class="deliverable-chip"><span>✓</span> GHL pipeline live</div>
+        <div class="deliverable-chip"><span>✓</span> All custom fields mapped</div>
+        <div class="deliverable-chip"><span>✓</span> ATS webhook connected</div>
+        <div class="deliverable-chip"><span>✓</span> 10 test records validated</div>
+        <div class="deliverable-chip"><span>✓</span> Milestone 1 sign-off</div>
       </div>
-      <div class="timeline-hours">8 – 10 HRS</div>
     </div>
-
-    <div class="timeline-item">
-      <div class="timeline-dot" style="--accent: var(--green)"></div>
-      <div class="timeline-phase">Phase 04</div>
-      <div class="timeline-content">
-        <h4>Testing & Reporting</h4>
-        <p>Rigorous end-to-end pipeline testing with live candidate scenarios, dashboard build for throughput and conversion metrics, bug fixes, documentation, and final handoff.</p>
-      </div>
-      <div class="timeline-hours">8 – 10 HRS</div>
-    </div>
-
   </div>
 
+  <!-- PHASE 02 -->
+  <div class="phase-block" id="ph2">
+    <div class="phase-header" onclick="togglePhase('ph2')">
+      <div class="phase-header-left">
+        <div class="phase-badge violet">Phase 02</div>
+        <div class="phase-title-group">
+          <h3>Automation Logic</h3>
+          <p>Zap Configuration · AI Screening · Workflow Rules · Auto-Tagging</p>
+        </div>
+      </div>
+      <div class="phase-hrs" style="color: #a78bfa;">10–12 <span style="font-size:18px;color:var(--text3)">hrs</span></div>
+      <div class="phase-toggle">▾</div>
+    </div>
+    <div class="phase-body">
+      <p class="impl-intro">The brain of the system. This phase wires together every conditional rule, routing decision, and automated action — so the pipeline runs itself. We build multi-step Zaps with error handling, configure all GHL workflow automations, and integrate and calibrate the AI phone screening tool end-to-end.</p>
+
+      <div class="impl-steps">
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(124,58,237,0.4); color: #a78bfa;">01</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Multi-Step Zap Architecture</div>
+            <p class="impl-step-sub">Expand the initial Zap into full multi-step flows. Each Zap includes: Filter step (only process relevant events), Formatter step (clean/transform data), Action step (create/update GHL contact + opportunity), Error path (Zapier Paths for failed records with Slack/email alert to admin). Build separate Zaps for: new application, status change, disqualification, and screening completion events.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Zapier Paths (branching)</span>
+              <span class="impl-detail-chip">Filter + Formatter steps</span>
+              <span class="impl-detail-chip">Error path + admin alert</span>
+              <span class="impl-detail-chip">4+ distinct Zap flows</span>
+              <span class="impl-detail-chip">Retry logic config</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(124,58,237,0.4); color: #a78bfa;">02</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">GHL Workflow Automation Rules</div>
+            <p class="impl-step-sub">Inside GHL Workflows, build trigger-action chains for every stage transition. When a contact enters "New Application" stage → assign to recruiter queue, apply source tag, start nurture sequence. When contact moves to "Screening" stage → trigger AI phone call. When "Qualified" → pause nurture, start scheduling sequence. Each workflow gets an "if/else" branch for handling edge cases.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Stage-trigger workflows</span>
+              <span class="impl-detail-chip">If/Else branching</span>
+              <span class="impl-detail-chip">Recruiter assignment rules</span>
+              <span class="impl-detail-chip">Sequence start/stop logic</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(124,58,237,0.4); color: #a78bfa;">03</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">AI Phone Screener Integration</div>
+            <p class="impl-step-sub">Connect the AI voice screening tool to GHL via its API or webhook. Configure the trigger: when a candidate reaches the "AI Screening" pipeline stage, GHL workflow calls the AI tool's API with the candidate's phone number and the job-specific question script. Upload and calibrate the screening script — question order, tone, disqualification triggers, and response capture fields.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">AI tool API connection</span>
+              <span class="impl-detail-chip">Script upload & calibration</span>
+              <span class="impl-detail-chip">Stage-trigger setup</span>
+              <span class="impl-detail-chip">Question flow config</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(124,58,237,0.4); color: #a78bfa;">04</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Screening Results Capture & Routing</div>
+            <p class="impl-step-sub">Configure the AI tool's outbound webhook — after each screening call, it sends results (score, transcript summary, individual answer data) back to GHL via a Zapier Zap or direct GHL webhook. Map results to custom fields on the GHL contact. Build conditional routing: score ≥ threshold → move to "Schedule Interview" stage; score below → "Needs Manual Review"; call failed → retry workflow fires.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Results webhook receiver</span>
+              <span class="impl-detail-chip">Score threshold routing</span>
+              <span class="impl-detail-chip">Transcript field mapping</span>
+              <span class="impl-detail-chip">Retry on call-fail logic</span>
+              <span class="impl-detail-chip">Manual review flagging</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(124,58,237,0.4); color: #a78bfa;">05</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Automated Tagging & Recruiter Alerts</div>
+            <p class="impl-step-sub">Build the full tagging system: source tags applied on entry, qualification tags applied after screening, stage-progression tags updated on every move. Configure recruiter notification workflows — instant in-GHL alerts when a candidate qualifies, Slack or email notification with candidate summary when manual review is needed, daily digest of pipeline movement for team leads.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Auto-tagging rules</span>
+              <span class="impl-detail-chip">GHL internal notifications</span>
+              <span class="impl-detail-chip">Slack/email alerts</span>
+              <span class="impl-detail-chip">Daily digest workflow</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="deliverable-strip">
+        <span class="deliverable-strip-label">// Phase 02 Deliverables</span>
+        <div class="deliverable-chip"><span>✓</span> 8+ Zaps configured & tested</div>
+        <div class="deliverable-chip"><span>✓</span> GHL workflows live</div>
+        <div class="deliverable-chip"><span>✓</span> AI screener integrated</div>
+        <div class="deliverable-chip"><span>✓</span> Routing logic validated</div>
+        <div class="deliverable-chip"><span>✓</span> Milestone 2 sign-off</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 03 -->
+  <div class="phase-block" id="ph3">
+    <div class="phase-header" onclick="togglePhase('ph3')">
+      <div class="phase-header-left">
+        <div class="phase-badge amber">Phase 03</div>
+        <div class="phase-title-group">
+          <h3>Engagement & Calendar</h3>
+          <p>SMS/Email Sequences · Google Calendar · No-Show Recovery</p>
+        </div>
+      </div>
+      <div class="phase-hrs" style="color: #fbbf24;">8–10 <span style="font-size:18px;color:var(--text3)">hrs</span></div>
+      <div class="phase-toggle">▾</div>
+    </div>
+    <div class="phase-body">
+      <p class="impl-intro">The candidate-facing layer. We deploy every pre-written messaging template into timed, conditional sequences — then build the full interview scheduling ecosystem on top of Google Calendar. By the end of this phase, a candidate can go from receiving a screening result to a confirmed interview slot without any human intervention.</p>
+
+      <div class="impl-steps">
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(245,158,11,0.4); color: #fbbf24;">01</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">SMS & Email Sequence Deployment</div>
+            <p class="impl-step-sub">Import all pre-written message templates into GHL's email and SMS builders. Build timed drip sequences for each pipeline stage: initial application confirmation (immediate), follow-up if no response (Day 2), re-engagement nudge (Day 4), final attempt (Day 7). Each sequence has a stop trigger — if the candidate responds or books, all pending messages are cancelled automatically.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Template import</span>
+              <span class="impl-detail-chip">Timed drip logic</span>
+              <span class="impl-detail-chip">Auto-stop on response</span>
+              <span class="impl-detail-chip">SMS compliance config</span>
+              <span class="impl-detail-chip">Unsubscribe handling</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(245,158,11,0.4); color: #fbbf24;">02</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Google Calendar Integration</div>
+            <p class="impl-step-sub">Connect GHL's calendar system to each recruiter's Google Calendar via OAuth. Configure availability windows — which days, hours, and meeting types are bookable. Set buffer time between interviews (15 min default), max interviews per day per recruiter, and advance booking windows (min 4 hours, max 14 days ahead). Sync is bi-directional: existing Google Calendar blocks are respected.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">OAuth calendar link</span>
+              <span class="impl-detail-chip">Availability windows</span>
+              <span class="impl-detail-chip">Buffer time rules</span>
+              <span class="impl-detail-chip">Bi-directional sync</span>
+              <span class="impl-detail-chip">Max-per-day limits</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(245,158,11,0.4); color: #fbbf24;">03</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Self-Scheduling Workflow Build</div>
+            <p class="impl-step-sub">When a candidate qualifies, a GHL workflow triggers an SMS + email containing a personalised scheduling link (GHL calendar widget). The link shows only real available slots. Upon booking: candidate receives confirmation email + Google Calendar invite with video/phone link. Recruiter receives instant alert with candidate name, role, and interview details. GHL pipeline stage auto-updates to "Interview Scheduled".</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Scheduling link generation</span>
+              <span class="impl-detail-chip">Auto-confirmation email</span>
+              <span class="impl-detail-chip">Google Cal invite</span>
+              <span class="impl-detail-chip">Stage auto-advance</span>
+              <span class="impl-detail-chip">Recruiter alert</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(245,158,11,0.4); color: #fbbf24;">04</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Pre-Interview Reminder Cadence</div>
+            <p class="impl-step-sub">Build a 3-touch reminder sequence that triggers automatically after booking: 24 hours before (email + SMS with interview details and prep tips), 2 hours before (SMS only — concise confirmation with dial-in/link), 30 minutes before (SMS only — "Your interview is in 30 minutes" with a quick link to reschedule if needed). Each reminder includes cancellation/reschedule options to reduce ghost-no-shows.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">T-24h email + SMS</span>
+              <span class="impl-detail-chip">T-2h SMS</span>
+              <span class="impl-detail-chip">T-30min SMS</span>
+              <span class="impl-detail-chip">Reschedule links</span>
+              <span class="impl-detail-chip">Cancellation handling</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(245,158,11,0.4); color: #fbbf24;">05</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">No-Show Recovery Protocol</div>
+            <p class="impl-step-sub">Configure a GHL workflow that fires exactly 15 minutes after a scheduled interview slot if the candidate has not been marked "Completed" by the recruiter. Recovery sequence: immediate SMS ("We missed you — here's a link to rebook"), follow-up email at T+1 hour with a sense of urgency, final attempt at T+24 hours before auto-archiving the record with a "No-Show" tag. Recruiter receives alert at each failed contact attempt.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">T+15min trigger</span>
+              <span class="impl-detail-chip">3-touch recovery sequence</span>
+              <span class="impl-detail-chip">Reschedule link</span>
+              <span class="impl-detail-chip">Auto-archive at T+24h</span>
+              <span class="impl-detail-chip">No-show tag applied</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="deliverable-strip">
+        <span class="deliverable-strip-label">// Phase 03 Deliverables</span>
+        <div class="deliverable-chip"><span>✓</span> All sequences live</div>
+        <div class="deliverable-chip"><span>✓</span> Google Calendar synced</div>
+        <div class="deliverable-chip"><span>✓</span> Self-scheduling tested</div>
+        <div class="deliverable-chip"><span>✓</span> Reminders firing correctly</div>
+        <div class="deliverable-chip"><span>✓</span> No-show flow validated</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 04 -->
+  <div class="phase-block" id="ph4">
+    <div class="phase-header" onclick="togglePhase('ph4')">
+      <div class="phase-header-left">
+        <div class="phase-badge green">Phase 04</div>
+        <div class="phase-title-group">
+          <h3>Testing & Reporting</h3>
+          <p>End-to-End QA · Dashboards · Documentation · Handoff</p>
+        </div>
+      </div>
+      <div class="phase-hrs" style="color: #34d399;">8–10 <span style="font-size:18px;color:var(--text3)">hrs</span></div>
+      <div class="phase-toggle">▾</div>
+    </div>
+    <div class="phase-body">
+      <p class="impl-intro">Nothing ships without it passing the gauntlet. We run the entire system through structured test scenarios, simulate every edge case (failed calls, no responses, duplicate submissions), build the reporting dashboards, and produce complete handoff documentation so your team can operate and modify the system independently.</p>
+
+      <div class="impl-steps">
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(16,185,129,0.4); color: #34d399;">01</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Full End-to-End Pipeline Testing</div>
+            <p class="impl-step-sub">Run a minimum of 20 live test candidates through the complete pipeline — from ATS application submission to confirmed interview. Test each pathway: qualified candidate, disqualified candidate, non-responsive candidate, candidate who reschedules, and no-show candidate. Verify every Zap fires, every GHL workflow triggers, every message sends, and every stage transition completes correctly.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">20+ test candidate runs</span>
+              <span class="impl-detail-chip">5 scenario pathways</span>
+              <span class="impl-detail-chip">Full audit log review</span>
+              <span class="impl-detail-chip">Zap history validation</span>
+              <span class="impl-detail-chip">GHL activity log check</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(16,185,129,0.4); color: #34d399;">02</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Edge Case & Fail-Safe Testing</div>
+            <p class="impl-step-sub">Deliberately break things to confirm the system handles failure gracefully. Test: duplicate application submission (same email), webhook delivery failure (Zapier retry), AI screening call failure (no answer, call dropped), candidate unsubscribes mid-sequence, recruiter calendar fully blocked. Verify error alerts fire, records land in correct fallback states, and no data is lost or duplicated.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Duplicate handling</span>
+              <span class="impl-detail-chip">Webhook retry test</span>
+              <span class="impl-detail-chip">Call failure recovery</span>
+              <span class="impl-detail-chip">Unsubscribe compliance</span>
+              <span class="impl-detail-chip">Data integrity check</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(16,185,129,0.4); color: #34d399;">03</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Analytics Dashboard Build</div>
+            <p class="impl-step-sub">Build GHL reporting dashboards with four core views: Pipeline Throughput (applications in → interviews out, by week/month), Stage Conversion Rates (% moving from each stage to the next — identifies bottlenecks), Recruiter Efficiency (interviews booked per recruiter, response times, no-show rates), and Time-to-Interview (average days from application to confirmed interview slot).</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Pipeline throughput view</span>
+              <span class="impl-detail-chip">Stage conversion funnel</span>
+              <span class="impl-detail-chip">Recruiter KPI cards</span>
+              <span class="impl-detail-chip">Time-to-interview metric</span>
+              <span class="impl-detail-chip">Weekly auto-refresh</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(16,185,129,0.4); color: #34d399;">04</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Bug Fixes & Optimization Pass</div>
+            <p class="impl-step-sub">After test runs, address every identified issue with a documented fix log. Optimize Zap performance (reduce unnecessary steps, remove redundant filters). Review message delivery rates and tune send-time settings. Check AI screener question flow for any awkward transitions based on test call recordings. Confirm all GHL workflows have correct enrollment filters to prevent double-triggering.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Fix log documentation</span>
+              <span class="impl-detail-chip">Zap optimization</span>
+              <span class="impl-detail-chip">Delivery rate review</span>
+              <span class="impl-detail-chip">Double-trigger prevention</span>
+              <span class="impl-detail-chip">Call recording review</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="impl-step">
+          <div class="impl-step-num" style="border-color: rgba(16,185,129,0.4); color: #34d399;">05</div>
+          <div class="impl-step-body">
+            <div class="impl-step-title">Documentation & Team Handoff</div>
+            <p class="impl-step-sub">Deliver a complete operations guide covering: system architecture overview (how all platforms connect), Zap-by-Zap breakdown (what each does and when), GHL workflow map (visual diagram of all automation rules), how to add a new recruiter, how to update message templates, how to pause/resume sequences, and a troubleshooting FAQ for the 10 most likely issues. Recorded walkthrough video included.</p>
+            <div class="impl-step-details">
+              <span class="impl-detail-chip">Architecture overview doc</span>
+              <span class="impl-detail-chip">Zap reference guide</span>
+              <span class="impl-detail-chip">GHL workflow map</span>
+              <span class="impl-detail-chip">Admin how-to guides</span>
+              <span class="impl-detail-chip">Recorded walkthrough</span>
+              <span class="impl-detail-chip">Troubleshooting FAQ</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="deliverable-strip">
+        <span class="deliverable-strip-label">// Phase 04 Deliverables</span>
+        <div class="deliverable-chip"><span>✓</span> 20 test runs passed</div>
+        <div class="deliverable-chip"><span>✓</span> All edge cases handled</div>
+        <div class="deliverable-chip"><span>✓</span> Dashboards operational</div>
+        <div class="deliverable-chip"><span>✓</span> Full documentation delivered</div>
+        <div class="deliverable-chip"><span>✓</span> Final project sign-off</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function togglePhase(id) {
+      const block = document.getElementById(id);
+      block.classList.toggle('open');
+    }
+  </script>
+
   <!-- Budget block -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px;">
     <div style="background: var(--bg2); border: 1px solid rgba(0,229,255,0.2); border-radius: 10px; padding: 32px;">
       <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--cyan); margin-bottom: 12px;">// PROJECT BUDGET</div>
       <div style="font-family: var(--display); font-size: 56px; color: var(--cyan); line-height: 1; margin-bottom: 8px;">$500<span style="font-size: 28px; color: var(--text2)"> – </span>$800</div>
