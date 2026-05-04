@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RecruitOS — Centralized Recruiting Automation Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #08080E;
+    --bg2: #0F0F1A;
+    --bg3: #14141F;
+    --border: #1E1E30;
+    --border2: #2A2A40;
+    --cyan: #00E5FF;
+    --cyan-dim: #00b8cc;
+    --cyan-glow: rgba(0,229,255,0.08);
+    --violet: #7C3AED;
+    --violet-dim: #6025c7;
+    --amber: #F59E0B;
+    --green: #10B981;
+    --red: #EF4444;
+    --text: #E8E8F0;
+    --text2: #8888A8;
+    --text3: #4A4A65;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Outfit', sans-serif;
+    --display: 'Bebas Neue', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Grid overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ───── NAV ───── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 64px;
+    background: rgba(8,8,14,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    text-decoration: none;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: color .2s;
+  }
+
+  .nav-links a:hover { color: var(--cyan); }
+
+  .nav-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: rgba(0,229,255,0.1);
+    color: var(--cyan);
+    border: 1px solid rgba(0,229,255,0.25);
+    border-radius: 4px;
+    padding: 4px 10px;
+    letter-spacing: 1px;
+  }
+
+  /* ───── HERO ───── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 48px 80px;
+    text-align: center;
+    z-index: 1;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--cyan);
+    opacity: 0.5;
+  }
+
+  .hero-title {
+    font-family: var(--display);
+    font-size: clamp(64px, 10vw, 130px);
+    line-height: 0.92;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, #fff 0%, var(--cyan) 50%, var(--violet) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--text2);
+    max-width: 620px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-bottom: 56px;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat-num {
+    font-family: var(--display);
+    font-size: 48px;
+    color: var(--cyan);
+    line-height: 1;
+    display: block;
+  }
+
+  .hero-stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .hero-divider {
+    width: 1px;
+    height: 60px;
+    background: var(--border2);
+    align-self: center;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: var(--cyan);
+    color: #000;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-primary:hover {
+    background: #33ecff;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,229,255,0.25);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 6px;
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+
+  /* ───── PIPELINE FLOW ───── */
+  .section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 48px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: clamp(36px, 5vw, 60px);
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .section-desc {
+    font-size: 16px;
+    color: var(--text2);
+    max-width: 560px;
+    margin-bottom: 60px;
+    line-height: 1.7;
+  }
+
+  /* Pipeline flow diagram */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+    position: relative;
+    margin-bottom: 80px;
+  }
+
+  .pipeline-step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pipeline-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 28px;
+    right: -1px;
+    width: calc(50% + 1px);
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    opacity: 0.4;
+    z-index: 2;
+  }
+
+  .pipeline-step:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: -1px;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--violet), var(--cyan));
+    opacity: 0.4;
+    z-index: 2;
+  }
+
+  .pipeline-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    position: relative;
+    z-index: 3;
+    margin-bottom: 12px;
+    transition: all .3s;
+    cursor: pointer;
+  }
+
+  .pipeline-step:hover .pipeline-icon {
+    border-color: var(--cyan);
+    background: rgba(0,229,255,0.08);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(0,229,255,0.2);
+  }
+
+  .pipeline-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .pipeline-step:hover .pipeline-label {
+    color: var(--cyan);
+  }
+
+  /* ───── MODULE CARDS ───── */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 80px;
+  }
+
+  .module-card {
+    background: var(--bg2);
+    padding: 40px 36px;
+    position: relative;
+    transition: background .3s;
+    cursor: default;
+  }
+
+  .module-card:hover {
+    background: var(--bg3);
+  }
+
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--accent, var(--cyan));
+    transition: height .4s ease;
+  }
+
+  .module-card:hover::before {
+    height: 100%;
+  }
+
+  .module-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text3);
+    margin-bottom: 16px;
+  }
+
+  .module-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .module-title {
+    font-family: var(--display);
+    font-size: 26px;
+    letter-spacing: 0.5px;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+
+  .module-desc {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
+
+  .module-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text3);
+    border: 1px solid var(--border);
+  }
+
+  .tag.accent { background: rgba(0,229,255,0.07); color: var(--cyan-dim); border-color: rgba(0,229,255,0.2); }
+  .tag.violet { background: rgba(124,58,237,0.1); color: #a78bfa; border-color: rgba(124,58,237,0.25); }
+  .tag.amber  { background: rgba(245,158,11,0.08); color: #fbbf24; border-color: rgba(245,158,11,0.2); }
+  .tag.green  { background: rgba(16,185,129,0.08); color: #34d399; border-color: rgba(16,185,129,0.2); }
+
+  /* ───── INTEGRATION ARCHITECTURE ───── */
+  .arch-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 48px;
+    margin-bottom: 80px;
+  }
+
+  .arch-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 32px;
+  }
+
+  .arch-flow {
+    display: grid;
+    grid-template-columns: 1fr 48px 1fr 48px 1fr;
+    gap: 0;
+    align-items: center;
+  }
+
+  .arch-node {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 24px 20px;
+    text-align: center;
+    position: relative;
+  }
+
+  .arch-node-logo {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .arch-node-name {
+    font-family: var(--display);
+    font-size: 20px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .arch-node-desc {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.5px;
+  }
+
+  .arch-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .arch-arrow-line {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--border2), var(--cyan), var(--border2));
+    position: relative;
+  }
+
+  .arch-arrow-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--text3);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .arch-sub-nodes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .arch-sub-node {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.1);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--cyan-dim);
+    letter-spacing: 0.5px;
+  }
+
+  /* ───── DETAILED WORKFLOW ───── */
+  .workflow-section {
+    margin-bottom: 80px;
+  }
+
+  .workflow-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .workflow-num-badge {
+    min-width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text3);
+    flex-shrink: 0;
+  }
+
+  .workflow-header-text h3 {
+    font-family: var(--display);
+    font-size: 36px;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .workflow-header-text p {
+    font-size: 14px;
+    color: var(--text2);
+  }
+
+  .workflow-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .workflow-item {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    gap: 16px;
+    transition: border-color .2s;
+  }
+
+  .workflow-item:hover {
+    border-color: var(--border2);
+  }
+
+  .workflow-item-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    margin-top: 6px;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px var(--cyan);
+  }
+
+  .workflow-item-dot.violet { background: var(--violet); box-shadow: 0 0 8px var(--violet); }
+  .workflow-item-dot.amber  { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .workflow-item-dot.green  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+  .workflow-item-text h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .workflow-item-text p {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.55;
+  }
+
+  /* ───── TECH STACK ───── */
+  .tech-section {
+    padding: 80px 48px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  .tech-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 48px;
+  }
+
+  .tech-item {
+    background: var(--bg2);
+    padding: 32px 20px;
+    text-align: center;
+    transition: background .2s;
+  }
+
+  .tech-item:hover {
+    background: var(--bg3);
+  }
+
+  .tech-item-icon {
+    font-size: 28px;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .tech-item-name {
+    font-family: var(--display);
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .tech-item-role {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+
+  /* ───── METRICS ───── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 80px;
+  }
+
+  .metric-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metric-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent, var(--cyan));
+    opacity: 0.5;
+  }
+
+  .metric-value {
+    font-family: var(--display);
+    font-size: 52px;
+    color: var(--accent, var(--cyan));
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .metric-unit {
+    font-family: var(--display);
+    font-size: 28px;
+  }
+
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+
+  .metric-desc {
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+
+  /* ───── TIMELINE / MILESTONES ───── */
+  .timeline {
+    position: relative;
+    margin-bottom: 80px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--cyan), var(--violet), transparent);
+    opacity: 0.3;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 40px;
+    padding: 0 0 48px 64px;
+    position: relative;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: 14px;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--accent, var(--cyan));
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .timeline-dot::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent, var(--cyan));
+  }
+
+  .timeline-phase {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent, var(--cyan));
+    min-width: 120px;
+    padding-top: 2px;
+  }
+
+  .timeline-content h4 {
+    font-family: var(--display);
+    font-size: 24px;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .timeline-content p {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+  .timeline-hours {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    white-space: nowrap;
+    padding-top: 4px;
+  }
+
+  /* ───── STATUS BAR ───── */
+  .status-bar {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(15,15,26,0.92);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 8px 16px;
+    backdrop-filter: blur(20px);
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .status-text {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text2);
+  }
+
+  /* ───── FOOTER ───── */
+  footer {
+    position: relative;
+    z-index: 1;
+    padding: 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-family: var(--display);
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--text3);
+  }
+
+  .footer-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+  }
+
+  /* ───── UTILITIES ───── */
+  .full-border-section {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,229,255,0.02);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up { animation: fadeUp .7s ease both; }
+  .delay-1 { animation-delay: .1s; }
+  .delay-2 { animation-delay: .2s; }
+  .delay-3 { animation-delay: .3s; }
+  .delay-4 { animation-delay: .4s; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">RECRUIT<span style="color:#fff;opacity:0.4">OS</span></a>
+  <ul class="nav-links">
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#modules">Modules</a></li>
+    <li><a href="#integration">Integration</a></li>
+    <li><a href="#timeline">Timeline</a></li>
+    <li><a href="#stack">Tech Stack</a></li>
+  </ul>
+  <div class="nav-badge">v1.0 BUILD</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow fade-up">Centralized Recruiting Infrastructure</p>
+  <h1 class="hero-title fade-up delay-1">RECRUIT<br>OS</h1>
+  <p class="hero-sub fade-up delay-2">
+    A fully automated candidate pipeline connecting your ATS to GoHighLevel via Zapier — from first application to scheduled interview, zero manual overhead.
+  </p>
+
+  <div class="hero-stats fade-up delay-3">
+    <div class="hero-stat">
+      <span class="hero-stat-num">30<span style="font-size:28px;color:var(--text2)">–</span>40</span>
+      <span class="hero-stat-label">Hours to build</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">7</span>
+      <span class="hero-stat-label">Core modules</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">100<span style="font-size:24px">%</span></span>
+      <span class="hero-stat-label">Automated flow</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">0</span>
+      <span class="hero-stat-label">Manual admin steps</span>
+    </div>
+  </div>
+
+  <div class="hero-cta fade-up delay-4">
+    <a href="#pipeline" class="btn-primary">View Full Pipeline →</a>
+    <a href="#modules" class="btn-secondary">Explore Modules</a>
+  </div>
+</section>
+
+<!-- PIPELINE OVERVIEW -->
+<section id="pipeline" class="section">
+  <p class="section-label">End-to-End Flow</p>
+  <h2 class="section-title">Candidate Pipeline</h2>
+  <p class="section-desc">Every touchpoint automated — from raw application ingestion through AI screening to confirmed interview booking.</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="pipeline-icon">📥</div>
+      <div class="pipeline-label">Application<br>Received</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">⚡</div>
+      <div class="pipeline-label">Zapier<br>Trigger</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">🤖</div>
+      <div class="pipeline-label">AI Phone<br>Screening</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">🏷️</div>
+      <div class="pipeline-label">Auto Tag<br>+ Stage</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">💬</div>
+      <div class="pipeline-label">SMS / Email<br>Nurture</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">📅</div>
+      <div class="pipeline-label">Calendar<br>Scheduling</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="pipeline-icon">✅</div>
+      <div class="pipeline-label">Interview<br>Confirmed</div>
+    </div>
+  </div>
+
+  <!-- Metrics row -->
+  <div class="metrics-grid">
+    <div class="metric-card" style="--accent: var(--cyan)">
+      <div class="metric-label">Pipeline Stages</div>
+      <div class="metric-value">12<span class="metric-unit">+</span></div>
+      <div class="metric-desc">GHL pipeline stages mirroring your exact process map</div>
+    </div>
+    <div class="metric-card" style="--accent: var(--violet)">
+      <div class="metric-label">Automation Zaps</div>
+      <div class="metric-value">8<span class="metric-unit">+</span></div>
+      <div class="metric-desc">Multi-step Zaps connecting ATS ↔ GHL in real-time</div>
+    </div>
+    <div class="metric-card" style="--accent: var(--amber)">
+      <div class="metric-label">Channels Active</div>
+      <div class="metric-value">3</div>
+      <div class="metric-desc">SMS, Email, and voice AI working in coordinated sequences</div>
+    </div>
+    <div class="metric-card" style="--accent: var(--green)">
+      <div class="metric-label">Response Uplift</div>
+      <div class="metric-value">3<span class="metric-unit">×</span></div>
+      <div class="metric-desc">Expected candidate responsiveness vs manual outreach</div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES GRID -->
+<div id="modules" class="full-border-section">
+<section class="section">
+  <p class="section-label">System Architecture</p>
+  <h2 class="section-title">7 Core Modules</h2>
+  <p class="section-desc">Each module is independently configured, tested, and linked — delivering a single cohesive recruiting machine.</p>
+
+  <div class="modules-grid">
+
+    <!-- 01 -->
+    <div class="module-card" style="--accent: var(--cyan)">
+      <div class="module-num">// MODULE 01</div>
+      <span class="module-icon">🏗️</span>
+      <h3 class="module-title">Core Infrastructure</h3>
+      <p class="module-desc">Complete GHL pipeline build mirroring your predefined stage logic. Custom fields, contact properties, opportunity records, and recruiter seat configuration from scratch.</p>
+      <div class="module-tags">
+        <span class="tag accent">GoHighLevel</span>
+        <span class="tag accent">Pipeline Builder</span>
+        <span class="tag">Custom Fields</span>
+        <span class="tag">Stage Logic</span>
+      </div>
+    </div>
+
+    <!-- 02 -->
+    <div class="module-card" style="--accent: var(--violet)">
+      <div class="module-num">// MODULE 02</div>
+      <span class="module-icon">🔗</span>
+      <h3 class="module-title">Systems Integration</h3>
+      <p class="module-desc">Robust API/Webhook bridge between your ATS and GHL through Zapier. Real-time data synchronization ensures candidate records are always in sync across both platforms.</p>
+      <div class="module-tags">
+        <span class="tag violet">Zapier</span>
+        <span class="tag violet">Webhooks</span>
+        <span class="tag">REST API</span>
+        <span class="tag">ATS Sync</span>
+      </div>
+    </div>
+
+    <!-- 03 -->
+    <div class="module-card" style="--accent: var(--amber)">
+      <div class="module-num">// MODULE 03</div>
+      <span class="module-icon">🤖</span>
+      <h3 class="module-title">AI Phone Screening</h3>
+      <p class="module-desc">Configure and calibrate AI voice screening tool triggers within the GHL workflow. Captures structured candidate data and updates pipeline stage automatically based on screening results.</p>
+      <div class="module-tags">
+        <span class="tag amber">AI Voice</span>
+        <span class="tag amber">Auto-scoring</span>
+        <span class="tag">Conditional Logic</span>
+        <span class="tag">Data Capture</span>
+      </div>
+    </div>
+
+    <!-- 04 -->
+    <div class="module-card" style="--accent: var(--cyan)">
+      <div class="module-num">// MODULE 04</div>
+      <span class="module-icon">⚙️</span>
+      <h3 class="module-title">Workflow Automation</h3>
+      <p class="module-desc">Automated candidate tagging, stage-triggered recruiter notifications, and internal alerts. Zero manual admin — the system reacts to candidate actions and moves records through stages automatically.</p>
+      <div class="module-tags">
+        <span class="tag accent">Auto-tagging</span>
+        <span class="tag accent">Notifications</span>
+        <span class="tag">Stage Triggers</span>
+        <span class="tag">GHL Workflows</span>
+      </div>
+    </div>
+
+    <!-- 05 -->
+    <div class="module-card" style="--accent: var(--green)">
+      <div class="module-num">// MODULE 05</div>
+      <span class="module-icon">💬</span>
+      <h3 class="module-title">Engagement Engine</h3>
+      <p class="module-desc">Multi-channel SMS and email nurturing sequences deployed with pre-built messaging templates. Timed follow-ups, conditional branches, and re-engagement flows to maximize candidate responsiveness.</p>
+      <div class="module-tags">
+        <span class="tag green">SMS</span>
+        <span class="tag green">Email</span>
+        <span class="tag">Sequences</span>
+        <span class="tag">Re-engagement</span>
+      </div>
+    </div>
+
+    <!-- 06 -->
+    <div class="module-card" style="--accent: var(--violet)">
+      <div class="module-num">// MODULE 06</div>
+      <span class="module-icon">📅</span>
+      <h3 class="module-title">Calendar Orchestration</h3>
+      <p class="module-desc">Sophisticated interview scheduling ecosystem integrated with Google Calendar. Automated reminders, pre-interview instructions, and "no-show" recovery protocols to protect every interview slot.</p>
+      <div class="module-tags">
+        <span class="tag violet">Google Calendar</span>
+        <span class="tag violet">Auto-reminders</span>
+        <span class="tag">No-show Recovery</span>
+        <span class="tag">Rescheduling</span>
+      </div>
+    </div>
+
+    <!-- 07 — spans full width -->
+    <div class="module-card" style="--accent: var(--amber); grid-column: 1 / -1;">
+      <div class="module-num">// MODULE 07</div>
+      <span class="module-icon">📊</span>
+      <h3 class="module-title">Reporting & Analytics</h3>
+      <p class="module-desc">High-level dashboards built inside GHL to monitor pipeline throughput, stage conversion rates, recruiter efficiency metrics, and time-to-interview KPIs. Real-time visibility into every stage of the funnel — identify bottlenecks, optimize follow-up cadences, and demonstrate ROI of the automated system to stakeholders.</p>
+      <div class="module-tags" style="margin-top: 16px;">
+        <span class="tag amber">GHL Dashboards</span>
+        <span class="tag amber">Conversion Metrics</span>
+        <span class="tag">Pipeline Throughput</span>
+        <span class="tag">Recruiter Efficiency</span>
+        <span class="tag">Time-to-Interview</span>
+        <span class="tag">Funnel Analytics</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div>
+
+<!-- INTEGRATION ARCHITECTURE -->
+<section id="integration" class="section">
+  <p class="section-label">Data Architecture</p>
+  <h2 class="section-title">Integration Layer</h2>
+  <p class="section-desc">Three-tier integration with webhook-based real-time sync and conditional logic at every handoff point.</p>
+
+  <div class="arch-wrap">
+    <p class="arch-title">// SYSTEM CONNECTIVITY MAP</p>
+    <div class="arch-flow">
+
+      <!-- ATS -->
+      <div class="arch-node">
+        <span class="arch-node-logo">📋</span>
+        <div class="arch-node-name" style="color: var(--cyan)">ATS</div>
+        <div class="arch-node-desc">Applicant Tracking<br>System (Source)</div>
+        <div class="arch-sub-nodes">
+          <div class="arch-sub-node">New Application Event</div>
+          <div class="arch-sub-node">Status Change Hook</div>
+          <div class="arch-sub-node">Candidate Data Export</div>
+        </div>
+      </div>
+
+      <!-- Arrow 1 -->
+      <div class="arch-arrow">
+        <div class="arch-arrow-line"></div>
+        <div class="arch-arrow-label">Webhook<br>/ REST API</div>
+      </div>
+
+      <!-- Zapier -->
+      <div class="arch-node" style="border-color: rgba(245,158,11,0.3);">
+        <span class="arch-node-logo">⚡</span>
+        <div class="arch-node-name" style="color: var(--amber)">ZAPIER</div>
+        <div class="arch-node-desc">Automation Middleware<br>(Logic Layer)</div>
+        <div class="arch-sub-nodes" style="border-color: rgba(245,158,11,0.2);">
+          <div class="arch-sub-node" style="border-color: rgba(245,158,11,0.2); color: #fbbf24;">Field Mapping & Transform</div>
+          <div class="arch-sub-node" style="border-color: rgba(245,158,11,0.2); color: #fbbf24;">Conditional Routing</div>
+          <div class="arch-sub-node" style="border-color: rgba(245,158,11,0.2); color: #fbbf24;">Error Handling & Retry</div>
+        </div>
+      </div>
+
+      <!-- Arrow 2 -->
+      <div class="arch-arrow">
+        <div class="arch-arrow-line"></div>
+        <div class="arch-arrow-label">API Push<br>/ GHL Hook</div>
+      </div>
+
+      <!-- GHL -->
+      <div class="arch-node" style="border-color: rgba(124,58,237,0.3);">
+        <span class="arch-node-logo">🚀</span>
+        <div class="arch-node-name" style="color: var(--violet)">GoHighLevel</div>
+        <div class="arch-node-desc">CRM + Automation<br>(Execution Engine)</div>
+        <div class="arch-sub-nodes" style="border-color: rgba(124,58,237,0.2);">
+          <div class="arch-sub-node" style="border-color: rgba(124,58,237,0.2); color: #a78bfa;">Contact + Opportunity</div>
+          <div class="arch-sub-node" style="border-color: rgba(124,58,237,0.2); color: #a78bfa;">Workflow Triggers</div>
+          <div class="arch-sub-node" style="border-color: rgba(124,58,237,0.2); color: #a78bfa;">SMS / Email / AI</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom integrations -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--border);">
+      <div style="text-align: center; padding: 16px; background: var(--bg3); border-radius: 8px; border: 1px solid var(--border);">
+        <div style="font-size: 20px; margin-bottom: 6px;">🗓️</div>
+        <div style="font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 1px;">GOOGLE CALENDAR</div>
+        <div style="font-family: var(--mono); font-size: 9px; color: var(--text3); margin-top: 3px;">Interview booking</div>
+      </div>
+      <div style="text-align: center; padding: 16px; background: var(--bg3); border-radius: 8px; border: 1px solid var(--border);">
+        <div style="font-size: 20px; margin-bottom: 6px;">📱</div>
+        <div style="font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 1px;">SMS CHANNEL</div>
+        <div style="font-family: var(--mono); font-size: 9px; color: var(--text3); margin-top: 3px;">Candidate nurturing</div>
+      </div>
+      <div style="text-align: center; padding: 16px; background: var(--bg3); border-radius: 8px; border: 1px solid var(--border);">
+        <div style="font-size: 20px; margin-bottom: 6px;">📧</div>
+        <div style="font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 1px;">EMAIL SEQUENCES</div>
+        <div style="font-family: var(--mono); font-size: 9px; color: var(--text3); margin-top: 3px;">Timed outreach</div>
+      </div>
+      <div style="text-align: center; padding: 16px; background: var(--bg3); border-radius: 8px; border: 1px solid var(--border);">
+        <div style="font-size: 20px; margin-bottom: 6px;">🎙️</div>
+        <div style="font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 1px;">AI VOICE SCREENER</div>
+        <div style="font-family: var(--mono); font-size: 9px; color: var(--text3); margin-top: 3px;">Automated screening</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed workflow breakdowns -->
+  <div class="workflow-section">
+    <div class="workflow-header">
+      <div class="workflow-num-badge" style="border-color: rgba(0,229,255,0.3); color: var(--cyan);">03</div>
+      <div class="workflow-header-text">
+        <h3 style="color: var(--text)">AI Screening Configuration</h3>
+        <p>Trigger logic, data capture fields, and result-based pipeline routing</p>
+      </div>
+    </div>
+    <div class="workflow-grid">
+      <div class="workflow-item">
+        <div class="workflow-item-dot"></div>
+        <div class="workflow-item-text">
+          <h4>Trigger Configuration</h4>
+          <p>AI phone call triggers when candidate enters "Screening" stage in GHL pipeline — no manual dial required.</p>
+        </div>
+      </div>
+      <div class="workflow-item">
+        <div class="workflow-item-dot"></div>
+        <div class="workflow-item-text">
+          <h4>Question Script Calibration</h4>
+          <p>Custom screening questions uploaded into the AI tool, matching your role-specific requirements and tone guidelines.</p>
+        </div>
+      </div>
+      <div class="workflow-item">
+        <div class="workflow-item-dot"></div>
+        <div class="workflow-item-text">
+          <h4>Data Capture & Sync</h4>
+          <p>Screening responses, scores, and transcript summaries automatically written back to the GHL contact record.</p>
+        </div>
+      </div>
+      <div class="workflow-item">
+        <div class="workflow-item-dot"></div>
+        <div class="workflow-item-text">
+          <h4>Result-Based Routing</h4>
+          <p>Conditional logic routes candidates to "Schedule Interview", "Needs Review", or "Disqualified" based on AI screening outcome score thresholds.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="workflow-section">
+    <div class="workflow-header">
+      <div class="workflow-num-badge" style="border-color: rgba(124,58,237,0.3); color: var(--violet);">06</div>
+      <div class="workflow-header-text">
+        <h3 style="color: var(--text)">Calendar Orchestration Detail</h3>
+        <p>Interview scheduling, reminder cadence, and no-show recovery protocols</p>
+      </div>
+    </div>
+    <div class="workflow-grid">
+      <div class="workflow-item">
+        <div class="workflow-item-dot violet"></div>
+        <div class="workflow-item-text">
+          <h4>Self-Scheduling Link</h4>
+          <p>GHL calendar widget embedded in SMS/email — candidates book directly into recruiter availability without back-and-forth.</p>
+        </div>
+      </div>
+      <div class="workflow-item">
+        <div class="workflow-item-dot violet"></div>
+        <div class="workflow-item-text">
+          <h4>Google Calendar Sync</h4>
+          <p>Bi-directional sync ensures recruiter calendar blocks are honored and interview bookings appear instantly in Google Calendar.</p>
+        </div>
+      </div>
+      <div class="workflow-item">
+        <div class="workflow-item-dot violet"></div>
+        <div class="workflow-item-text">
+          <h4>Reminder Sequence</h4>
+          <p>Automated SMS + email reminders at 24h, 2h, and 30min before interview — reducing no-show rate significantly.</p>
+        </div>
+      </div>
+      <div class="workflow-item">
+        <div class="workflow-item-dot violet"></div>
+        <div class="workflow-item-text">
+          <h4>No-Show Recovery</h4>
+          <p>If candidate misses slot: automated re-engagement sequence fires within 15 minutes offering a reschedule link with urgency messaging.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE / BUILD PHASES -->
+<div class="full-border-section">
+<section id="timeline" class="section">
+  <p class="section-label">Project Timeline</p>
+  <h2 class="section-title">Build Milestones</h2>
+  <p class="section-desc">Structured 4-phase delivery with weekly testing milestones and clear handoff criteria at each stage.</p>
+
+  <div class="timeline">
+
+    <div class="timeline-item">
+      <div class="timeline-dot" style="--accent: var(--cyan)"></div>
+      <div class="timeline-phase">Phase 01</div>
+      <div class="timeline-content">
+        <h4>Foundation Build</h4>
+        <p>GHL environment setup — pipeline stages, custom contact fields, recruiter accounts, opportunity templates. ATS → Zapier webhook connection and initial field mapping validation.</p>
+      </div>
+      <div class="timeline-hours">6 – 8 HRS</div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot" style="--accent: var(--violet)"></div>
+      <div class="timeline-phase">Phase 02</div>
+      <div class="timeline-content">
+        <h4>Automation Logic</h4>
+        <p>Multi-step Zap configuration, GHL workflow automation rules, AI screening tool integration and calibration, automated tagging system, and conditional routing logic.</p>
+      </div>
+      <div class="timeline-hours">10 – 12 HRS</div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot" style="--accent: var(--amber)"></div>
+      <div class="timeline-phase">Phase 03</div>
+      <div class="timeline-content">
+        <h4>Engagement & Calendar</h4>
+        <p>SMS/email nurturing sequence deployment (using pre-built templates), Google Calendar integration, self-scheduling workflow, reminder sequences, and no-show recovery protocol.</p>
+      </div>
+      <div class="timeline-hours">8 – 10 HRS</div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot" style="--accent: var(--green)"></div>
+      <div class="timeline-phase">Phase 04</div>
+      <div class="timeline-content">
+        <h4>Testing & Reporting</h4>
+        <p>Rigorous end-to-end pipeline testing with live candidate scenarios, dashboard build for throughput and conversion metrics, bug fixes, documentation, and final handoff.</p>
+      </div>
+      <div class="timeline-hours">8 – 10 HRS</div>
+    </div>
+
+  </div>
+
+  <!-- Budget block -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <div style="background: var(--bg2); border: 1px solid rgba(0,229,255,0.2); border-radius: 10px; padding: 32px;">
+      <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--cyan); margin-bottom: 12px;">// PROJECT BUDGET</div>
+      <div style="font-family: var(--display); font-size: 56px; color: var(--cyan); line-height: 1; margin-bottom: 8px;">$500<span style="font-size: 28px; color: var(--text2)"> – </span>$800</div>
+      <div style="font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: 1px;">USD · Fixed-scope engagement · Milestone payments</div>
+    </div>
+    <div style="background: var(--bg2); border: 1px solid rgba(124,58,237,0.2); border-radius: 10px; padding: 32px;">
+      <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--violet); margin-bottom: 16px;">// WHAT'S PROVIDED</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+          <span style="color: var(--green); font-size: 14px; margin-top: 1px;">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">Complete process map — no strategy needed</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+          <span style="color: var(--green); font-size: 14px; margin-top: 1px;">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">All messaging templates pre-written</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+          <span style="color: var(--green); font-size: 14px; margin-top: 1px;">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">Access to all platforms (GHL, Zapier, ATS)</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+          <span style="color: var(--green); font-size: 14px; margin-top: 1px;">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">Flexible remote schedule, weekly milestone reviews</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+          <span style="color: var(--violet); font-size: 14px; margin-top: 1px;">★</span>
+          <span style="font-size: 13px; color: var(--text2);">Long-term maintenance contract opportunity</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- TECH STACK -->
+<section id="stack" class="section">
+  <p class="section-label">Technology Stack</p>
+  <h2 class="section-title">Platform Stack</h2>
+  <p class="section-desc">Six best-in-class platforms working in concert to deliver the fully automated recruiting pipeline.</p>
+</section>
+
+<div class="tech-section">
+<div class="tech-inner">
+  <div class="tech-grid">
+    <div class="tech-item">
+      <span class="tech-item-icon">🎯</span>
+      <div class="tech-item-name">GoHighLevel</div>
+      <div class="tech-item-role">CRM + Pipeline</div>
+    </div>
+    <div class="tech-item">
+      <span class="tech-item-icon">⚡</span>
+      <div class="tech-item-name">Zapier</div>
+      <div class="tech-item-role">Integration Layer</div>
+    </div>
+    <div class="tech-item">
+      <span class="tech-item-icon">📋</span>
+      <div class="tech-item-name">ATS</div>
+      <div class="tech-item-role">Candidate Source</div>
+    </div>
+    <div class="tech-item">
+      <span class="tech-item-icon">🤖</span>
+      <div class="tech-item-name">AI Voice</div>
+      <div class="tech-item-role">Phone Screening</div>
+    </div>
+    <div class="tech-item">
+      <span class="tech-item-icon">🗓️</span>
+      <div class="tech-item-name">Google Cal</div>
+      <div class="tech-item-role">Interview Scheduling</div>
+    </div>
+    <div class="tech-item">
+      <span class="tech-item-icon">📊</span>
+      <div class="tech-item-name">Dashboards</div>
+      <div class="tech-item-role">Analytics & Reporting</div>
+    </div>
+  </div>
+
+  <!-- Requirements list -->
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 48px;">
+    <div>
+      <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text3); margin-bottom: 16px; text-transform: uppercase;">// Required Expertise</div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--cyan); min-width: 24px;">[1]</span>
+          <span style="font-size: 13px; color: var(--text2);">Advanced GoHighLevel workflow and pipeline construction</span>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--cyan); min-width: 24px;">[2]</span>
+          <span style="font-size: 13px; color: var(--text2);">Multi-step Zapier automation with error handling and conditional logic</span>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--cyan); min-width: 24px;">[3]</span>
+          <span style="font-size: 13px; color: var(--text2);">ATS data export management and API-level integration experience</span>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;">
+          <span style="font-family: var(--mono); font-size: 11px; color: var(--cyan); min-width: 24px;">[4]</span>
+          <span style="font-size: 13px; color: var(--text2);">Webhook architecture and API documentation fluency for fail-safe builds</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text3); margin-bottom: 16px; text-transform: uppercase;">// Deliverables Checklist</div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;">
+          <span style="color: var(--green);">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">GHL pipeline with full stage logic</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;">
+          <span style="color: var(--green);">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">Zapier Zaps with error & retry handling</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;">
+          <span style="color: var(--green);">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">AI screener configured & tested</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;">
+          <span style="color: var(--green);">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">SMS + email sequences deployed</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;">
+          <span style="color: var(--green);">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">Calendar + no-show recovery live</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;">
+          <span style="color: var(--green);">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">Analytics dashboards operational</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;">
+          <span style="color: var(--green);">✓</span>
+          <span style="font-size: 13px; color: var(--text2);">End-to-end testing documentation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">RECRUITОС</div>
+  <div class="footer-meta">CENTRALIZED RECRUITING INFRASTRUCTURE · ATS → ZAPIER → GHL · 30–40 HRS · $500–$800</div>
+</footer>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="status-dot"></div>
+  <div class="status-text">SYSTEM READY · ALL MODULES MAPPED</div>
+</div>
+
+<script>
+  // Animate elements on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.module-card, .metric-card, .timeline-item, .workflow-item, .arch-node, .tech-item').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+
+  // Pipeline hover interactions
+  document.querySelectorAll('.pipeline-step').forEach((step, i) => {
+    step.addEventListener('mouseenter', () => {
+      step.querySelector('.pipeline-label').style.color = 'var(--cyan)';
+    });
+    step.addEventListener('mouseleave', () => {
+      step.querySelector('.pipeline-label').style.color = '';
+    });
+  });
+
+  // Smooth nav active state
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--cyan)' : '';
+    });
+  });
+</script>
+</body>
+</html>
